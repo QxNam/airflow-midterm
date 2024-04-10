@@ -873,3 +873,9 @@ File Path                      PID    Runtime      # DAGs    # Errors  Last Runt
 /opt/airflow/dags/pipeline.py                           1           0  1.87s           2024-04-06T04:50:55
 ================================================================================
 [2024-04-06T04:51:34.912+0000] {manager.py:451} INFO - Exiting gracefully upon receiving signal 15
+[2024-04-06T13:05:50.496+0000] {manager.py:469} INFO - Processing files using up to 2 processes at a time 
+[2024-04-06T13:05:50.497+0000] {manager.py:470} INFO - Process each file at most once every 30 seconds
+[2024-04-06T13:05:50.497+0000] {manager.py:471} INFO - Checking for new files in /opt/airflow/dags every 300 seconds
+[2024-04-06T13:05:50.497+0000] {manager.py:738} INFO - Searching for files in /opt/airflow/dags
+[2024-04-06T13:05:50.501+0000] {manager.py:741} INFO - There are 1 files in /opt/airflow/dags
+[2024-04-06T13:05:53.823+0000] {manager.py:451} INFO - Exiting gracefully upon receiving signal 15

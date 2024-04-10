@@ -20,8 +20,8 @@ mongo_client = pymongo.MongoClient("mongodb://admin:admin@mongo_db:27017")
 database_mongo = mongo_client["midterm"]
 # tạo collection có tên là mssv của bạn trong MongoDB và Qdrant
 # ví dụ mssv của bạn là 17101691 thi tên collection sẽ là "17101691"
-collection_mongo = database_mongo["20020541"]
-name_collection_qdrant = '20020541'
+collection_mongo = database_mongo["12345678"]
+name_collection_qdrant = '12345678'
 
 
 def create_collection_qdrant():
@@ -153,7 +153,7 @@ def search_by_vector():
 
 # đặt owner là mssv của bạn, Thử lại 1 lần nếu thất bại, thời gian chờ giữa các lần thử là 1 phút
 default_args = {
-    'owner': '20020541',
+    'owner': '12345678',
     'start_date': dt.datetime.now() - dt.timedelta(minutes=2),
     'retries': 1,
     'retry_delay': dt.timedelta(minutes=2),
@@ -162,18 +162,18 @@ default_args = {
 
 # khởi tạo DAG với tên là mssv của bạn và cài đặt mỗi 5 phút chạy 1 lần
 
-with DAG('20020541', 
+with DAG('12345678', 
          default_args=default_args,
          tags=['midterm'],
          schedule_interval=dt.timedelta(minutes=5),
          ) as dag:
-    t1 = BashOperator(task_id='20020541', bash_command='echo "Midterm exam started"')
-    t2 = PythonOperator(task_id='2002', python_callable=create_collection_qdrant)
-    t3 = PythonOperator(task_id='0020', python_callable=insert_data_mongoDB)
-    t4 = PythonOperator(task_id='0205', python_callable=insert_data_qdrant)
-    t5 = PythonOperator(task_id='2054', python_callable=count_data)
-    t6 = PythonOperator(task_id='0541', python_callable=search_by_vector)
-    t7 = BashOperator(task_id='2041', bash_command='echo "Midterm exam ended"')
+    t1 = BashOperator(task_id='12345678', bash_command='echo "Midterm exam started"')
+    t2 = PythonOperator(task_id='1234', python_callable=create_collection_qdrant)
+    t3 = PythonOperator(task_id='2345', python_callable=insert_data_mongoDB)
+    t4 = PythonOperator(task_id='3456', python_callable=insert_data_qdrant)
+    t5 = PythonOperator(task_id='4567', python_callable=count_data)
+    t6 = PythonOperator(task_id='5678', python_callable=search_by_vector)
+    t7 = BashOperator(task_id='1278', bash_command='echo "Midterm exam ended"')
     # khởi tạo pipeline sử dụng BashOperator và PythonOperator như sau:
     # task 1: sử dụng BashOperator để in ra "Midterm exam started" với task_id là mssv của bạn (ví dụ: task_id='17101691')
     # task 2: sử dụng PythonOperator để tạo collection trong Qdrant với task_id là 4 chữ số đầu của mssv của bạn (ví dụ: task_id='1710')

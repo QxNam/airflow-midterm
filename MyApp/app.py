@@ -1,4 +1,3 @@
-
 import random
 import flask
 from flask import request, make_response
@@ -9,7 +8,7 @@ app = flask.Flask(__name__)
 
 def search(query):
     # đặt tên collection bạn đã tạo khi thực hiện pipeline vào biến bên dưới
-    collection_name = '20020541'
+    collection_name = '12345678'
     # thực hiện kết nối với cơ sở dữ liệu qdrant
     client = QdrantClient(host='qdrant_db', port=6333)
     collections = client.get_collections()
@@ -33,7 +32,7 @@ def healthCheck():
     # điền mssv của bạn vào bên dưới
     return {
         "status": "success",
-        "student_id": 20020541
+        "student_id": "12345678"
     }
 
 # Viết api có route "/search", phương thức POST để nhận vào câu query từ phía ngưới dùng

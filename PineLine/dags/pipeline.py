@@ -67,8 +67,12 @@ def insert_data_mongoDB():
         # nếu đã tồn tại thì gán "Data already exists" cho biến message
         # nếu chưa thì thêm trường "status": "new" vào data và insert vào MongoDB 
         # sau đó gán "Data inserted" cho biến message
-        title_lst = [x for x in collection_mongo.find({},{ "title": 0 })]
-        if data['title'] in title_lst:
+        check = collection_mongo.find({'title': data['title']})
+        dup = 0
+        for _ in check:
+            dup = 1
+
+        if dup == 1:
             message = "Data already exists"
         else:
             data["status"] = "new"
@@ -97,13 +101,13 @@ def insert_data_qdrant():
         new_records = collection_mongo.find({"status": "new"})
 
         for new in new_records:
+            collection_mongo.update_one({"_id": new['_id']}, {"$set": {"status": "indexed"}})
             id = str(new.pop('_id'))
             vector = new['embedding']
             point = PointStruct(id=str(uuid.uuid4()),
                                 vector=vector,
                                 payload=new)
             qdrant_client.upsert(collection_name=name_collection_qdrant, points=[point])
-            collection_mongo.update_one({"_id": id}, {"$set": {"status": "indexed"}})
 
         return {
             "status": "success",
@@ -138,7 +142,9 @@ def count_data():
 def search_by_vector():
     try:
         # tạo ngẫu nhiên một vector có size = 1536 và sử dụng Qdrant để tìm kiếm 1 điểm gần nhất
-        result = [random.random() for i in range(1536)]
+        vector = [random.random() for i in range(1536)]
+        # tìm kiếm 1 điểm gần nhất
+        result = qdrant_client.search(collection_name=name_collection_qdrant, query_vector=vector, limit=1)
 
         result_json = result[0].model_dump()
         return {
@@ -167,13 +173,13 @@ with DAG('12345678',
          tags=['midterm'],
          schedule_interval=dt.timedelta(minutes=5),
          ) as dag:
-    t1 = BashOperator(task_id='12345678', bash_command='echo "Midterm exam started"')
-    t2 = PythonOperator(task_id='1234', python_callable=create_collection_qdrant)
-    t3 = PythonOperator(task_id='2345', python_callable=insert_data_mongoDB)
-    t4 = PythonOperator(task_id='3456', python_callable=insert_data_qdrant)
-    t5 = PythonOperator(task_id='4567', python_callable=count_data)
-    t6 = PythonOperator(task_id='5678', python_callable=search_by_vector)
-    t7 = BashOperator(task_id='1278', bash_command='echo "Midterm exam ended"')
+    t1 = BashOperator(task_id='start', bash_command='echo "Midterm exam started"')
+    t2 = PythonOperator(task_id='init_qdrant', python_callable=create_collection_qdrant)
+    t3 = PythonOperator(task_id='insert_mongo', python_callable=insert_data_mongoDB)
+    t4 = PythonOperator(task_id='insert_qdrant', python_callable=insert_data_qdrant)
+    t5 = PythonOperator(task_id='count', python_callable=count_data)
+    t6 = PythonOperator(task_id='search', python_callable=search_by_vector)
+    t7 = BashOperator(task_id='end', bash_command='echo "Midterm exam ended"')
     # khởi tạo pipeline sử dụng BashOperator và PythonOperator như sau:
     # task 1: sử dụng BashOperator để in ra "Midterm exam started" với task_id là mssv của bạn (ví dụ: task_id='17101691')
     # task 2: sử dụng PythonOperator để tạo collection trong Qdrant với task_id là 4 chữ số đầu của mssv của bạn (ví dụ: task_id='1710')
@@ -182,3 +188,5 @@ with DAG('12345678',
     # task 5: sử dụng PythonOperator để thực hiện hàm count_data với task_id là 3 chữ số cuối của task4 và số kế tiếp trong mssv (ví dụ: task_id='0169')
     # task 6: sử dụng PythonOperator để thực hiện search bằng vector với task_id là 3 chữ số cuối của task5 và số kế tiếp trong mssv (ví dụ: task_id='1691')
     # task 7: sử dụng BashOperator để in ra "Midterm exam ended" với task_id là 2 số đầu và 2 số cuối của mssv (ví dụ: task_id='1791')
+
+t1 >> t2 >> t3 >> t4 >> t5 >> t6 >> t7

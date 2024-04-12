@@ -72,7 +72,7 @@ services:
     networks:
       - qdrant-network
     ports:
-      - "27017:27017"
+      - "27029:27017"
     
   qdrant_db:
     image: qdrant/qdrant:v1.4.1

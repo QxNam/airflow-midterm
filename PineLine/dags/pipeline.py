@@ -101,13 +101,14 @@ def insert_data_qdrant():
         new_records = collection_mongo.find({"status": "new"})
 
         for new in new_records:
-            collection_mongo.update_one({"_id": new['_id']}, {"$set": {"status": "indexed"}})
-            id = str(new.pop('_id'))
+            id = new.pop('_id')
             vector = new['embedding']
+            _ = new.pop('embedding')
             point = PointStruct(id=str(uuid.uuid4()),
                                 vector=vector,
                                 payload=new)
             qdrant_client.upsert(collection_name=name_collection_qdrant, points=[point])
+            collection_mongo.update_one({"_id": id}, {"$set": {"status": "indexed"}})
 
         return {
             "status": "success",
